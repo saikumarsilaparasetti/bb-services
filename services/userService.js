@@ -18,6 +18,13 @@ const userService = {
             throw error;
         }
     },
+    getUserByPhone: async (phone) => {
+        try {
+            return await userModel.findOne({ phone }).select('-password');
+        } catch (error) {
+            throw error;
+        }
+    },
 
     getUserByEmail: async (email) => {
         try {

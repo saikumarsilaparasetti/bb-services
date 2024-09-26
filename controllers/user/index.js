@@ -22,6 +22,19 @@ const userController = {
                 return utils.errorResponse(res, 'Invalid email format', 400);
             }
 
+            // Check if user already exists with the given phone number
+            const existingUserByPhone = await userService.getUserByPhone(phone);
+            if (existingUserByPhone) {
+                return utils.errorResponse(res, 'A user with this phone number already exists', 400);
+            }
+
+            // Check if user already exists with the given email (if provided)
+            if (email) {
+                const existingUserByEmail = await userService.getUserByEmail(email);
+                if (existingUserByEmail) {
+                    return utils.errorResponse(res, 'A user with this email already exists', 400);
+                }
+            }
             // Create user using userService
             const newUser = await userService.createUser({ username, password, phone, email });
 
