@@ -50,7 +50,56 @@ const userController = {
             console.error('Error in user signup:', error);
             return utils.errorResponse(res, 500, 'Internal server error');
         }
-    }
+    },
+
+    login: async (req, res) => {
+        try {
+            const { phone, password } = req.body;
+
+            // Field validation
+            if (!phone || !password) {
+                return utils.errorResponse(res, 'Phone and password are required', 400);
+            }
+
+            if (!utils.isValidPhoneNumber(phone)) {
+                return utils.errorResponse(res, 'Invalid phone number format', 400);
+            }
+
+            // Authenticate user
+            const user = await userService.authenticateUser(phone, password);
+            if (!user) {
+                return utils.errorResponse(res, 'User not found', 404);
+            }
+
+            const isMatch = await user.comparePassword(password);
+            if (!isMatch) {
+                return utils.errorResponse(res, 'Invalid credentials', 401);
+            }
+
+            // Generate JWT token (assuming you have a function for this)
+            // const token = generateToken(user);
+
+            // Generate JWT token
+            const token = utils.generateToken({
+                id: user._id,
+                username: user.username,
+                phone: user.phone,
+                email: user.email
+            });
+            return utils.successResponse(res, {
+                user: {
+                    id: user._id,
+                    username: user.username,
+                    phone: user.phone,
+                    email: user.email
+                },
+                token: token
+            }, 'User signed in successfully');
+        } catch (error) {
+            console.error('Error in user login:', error);
+            return utils.errorResponse(res, 'Internal server error', 500);
+        }
+    },
 }
 
 module.exports = userController

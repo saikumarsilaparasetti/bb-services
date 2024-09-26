@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const utils = {
     successResponse: (res, data, message = 'Operation successful', statusCode = 200) => {
         return res.status(statusCode).json({
@@ -55,7 +57,33 @@ const utils = {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return passwordRegex.test(password);
     }
+    ,
 
+    generateToken: (payload) => {
+        const secretKey = process.env.JWT_SECRET // Use environment variable for security
+        const expiresIn = '1d'; // Token expires in 1 day
+
+        return jwt.sign(payload, secretKey, { expiresIn });
+    }
+
+,
+
+    decryptToken: (token) => {
+        try {
+            const secretKey = process.env.JWT_SECRET; // Use the same secret key used for generating the token
+            const decoded = jwt.verify(token, secretKey);
+            return decoded;
+        } catch (error) {
+            // Handle different types of errors
+            if (error.name === 'TokenExpiredError') {
+                throw new Error('Token has expired');
+            } else if (error.name === 'JsonWebTokenError') {
+                throw new Error('Invalid token');
+            } else {
+                throw error; // For any other errors
+            }
+        }
+    }
 
 }
 

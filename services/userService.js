@@ -20,7 +20,7 @@ const userService = {
     },
     getUserByPhone: async (phone) => {
         try {
-            return await userModel.findOne({ phone }).select('-password');
+            return await userModel.findOne({ phone }).lean().exec()//.select('-password').;
         } catch (error) {
             throw error;
         }
@@ -50,9 +50,9 @@ const userService = {
         }
     },
 
-    authenticateUser: async (email, password) => {
+    authenticateUser: async (phone, password) => {
         try {
-            const user = await userModel.findOne({ email });
+            const user = await userModel.findOne({ phone });
             if (!user) {
                 throw new Error('User not found');
             }
